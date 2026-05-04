@@ -38,6 +38,8 @@ src/
 
 ├── modules/                       # Business domain modules
 │   ├── auth/                      # Device authentication, JWT issuance
+│   │   ├── dto/                   # Auth-specific request/response shapes
+│   │   └── types/                 # Auth-specific payload/request types
 │   ├── station/                   # Station data, device registration
 │   ├── session/                   # Session lifecycle, cart, timeouts
 │   ├── catalog/                   # Products, templates, station overrides
@@ -65,7 +67,7 @@ src/
 ├── infrastructure/                # External integrations
 │   ├── database/                  # PrismaService, DatabaseModule
 │   ├── messaging/                 # Async orchestration and integration flow coordination
-│   ├── sdk/                       # Gilbarco OpenOSP SDK integration layer (CefSharp/browser bridge)
+│   ├── sdk/                       # Contracts/adapters for terminal SDK-related events and payloads
 │   ├── ifsf/                      # IFSF integration/adaptation layer
 │   └── external/
 │       ├── xibo/                  # Xibo API client / content integration

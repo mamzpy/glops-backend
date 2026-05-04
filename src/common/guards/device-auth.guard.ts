@@ -11,7 +11,6 @@ import { Request } from 'express';
 import { DeviceJwtPayload } from '../../modules/auth/types/device-jwt-payload.type';
 import { RequestWithDevice } from '../../modules/auth/types/request-with-device.type';
 
-
 @Injectable()
 export class DeviceAuthGuard implements CanActivate {
   private readonly logger = new Logger(DeviceAuthGuard.name);

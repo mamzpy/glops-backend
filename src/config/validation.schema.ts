@@ -18,7 +18,7 @@ export const validationSchema = Joi.object({
   PAYMENT_WAIT_TIMEOUT: Joi.number().integer().positive().default(120),
   SUSPEND_RECOVERY_TIMEOUT: Joi.number().integer().positive().default(60),
 
-  XIBO_API_URL: Joi.string().uri().required(),
-  XIBO_CLIENT_ID: Joi.string().required(),
-  XIBO_CLIENT_SECRET: Joi.string().required(),
+  XIBO_API_URL: Joi.string().uri().allow('').optional(),
+  XIBO_CLIENT_ID: Joi.string().allow('').optional(),
+  XIBO_CLIENT_SECRET: Joi.string().allow('').optional(),
 });
