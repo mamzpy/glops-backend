@@ -4,6 +4,8 @@ import { PrismaService } from '../../infrastructure/database/prisma.service';
 import { DeviceStatus } from '@prisma/client';
 import { DeviceLoginDto } from './dto/device-login.dto';
 import * as bcrypt from 'bcrypt';
+import { DeviceJwtPayload } from './types/device-jwt-payload.type';
+import { DeviceLoginResponse } from './types/device-login-response.type';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +16,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async loginDevice(dto: DeviceLoginDto): Promise<{ accessToken: string }> {
+  async loginDevice(dto: DeviceLoginDto): Promise<DeviceLoginResponse> {
     const device = await this.prisma.device.findUnique({
       where: { deviceId: dto.deviceId },
     });
@@ -45,7 +47,8 @@ export class AuthService {
       data: { lastSeenAt: new Date() },
     });
 
-    const payload = {
+    const payload: DeviceJwtPayload = {
+      sub: device.id,
       deviceId: device.deviceId,
       stationId: device.stationId,
       type: device.type,
