@@ -20,7 +20,7 @@ Built with NestJS + TypeScript + Prisma + MySQL.
 
 ## Current Scope
 
-Current implementation currently includes:
+Current implementation includes:
 
 - Project structure and architectural boundaries
 - Configuration module with Joi validation at startup
