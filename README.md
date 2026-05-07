@@ -278,6 +278,7 @@ src/
 ├── infrastructure/                # External integrations
 │   ├── database/                  # PrismaService, DatabaseModule
 │   ├── messaging/                 # Async event layer (placeholder)
+│   ├── jobs/                      # Background jobs / cron tasks    
 │   ├── sdk/                       # Gilbarco SDK contracts/adapters (placeholder)
 │   ├── ifsf/                      # HyperITech/IFSF adapter (placeholder)
 │   └── external/
