@@ -119,6 +119,8 @@ npm run start:dev
 
 Device authentication is machine-to-machine. OPT terminals authenticate using a `deviceId` + `secret` pair and receive a JWT.
 
+This authentication model is intended for terminal-to-backend communication rather than end-user authentication.
+
 ### Login
 
 ```
@@ -176,7 +178,7 @@ Devices with status `BLOCKED` or `MAINTENANCE` are rejected at the guard level e
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/station/me` | Returns station context from authenticated device JWT |
+| GET | `/station/me` | Returns authenticated device and station context extracted from the JWT |
 
 ---
 
