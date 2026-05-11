@@ -1,50 +1,108 @@
 # GLOPS — Data Ownership and System Flows
 
 > Bozza architetturale ad alto livello.
-> Diversi aspetti del sistema risultano ancora in fase di analisi e validazione a causa delle numerose integrazioni esterne e delle informazioni tecniche non ancora definitive.
+> Diversi aspetti del sistema risultano ancora in fase di analisi e validazione a causa delle
+> numerose integrazioni esterne e delle informazioni tecniche non ancora definitive.
 
 ---
 
-# 1. Obiettivo del documento
+## 1. Obiettivo del documento
 
 Questo documento ha lo scopo di definire una visione iniziale di:
 
-* ownership dei dati
-* responsabilità del backend GLOPS
-* modalità di comunicazione tra i sistemi
-* persistenza dei dati
-* differenze tra integrazione con sistemi esistenti e servizi gestiti direttamente da GLOPS
+- ownership dei dati
+- responsabilità del backend GLOPS
+- modalità di comunicazione tra i sistemi
+- persistenza dei dati
+- differenze tra integrazione con sistemi esistenti e servizi gestiti direttamente da GLOPS
 
-L’obiettivo non è definire un’architettura finale, ma costruire una base condivisa per comprendere come il sistema potrebbe evolvere nei diversi scenari operativi.
+L'obiettivo non è definire un'architettura finale, ma costruire una base condivisa per comprendere
+come il sistema potrebbe evolvere nei diversi scenari operativi.
 
 ---
 
-# 2. Concetti principali
+## 2. Concetti principali
 
 La piattaforma deve supportare due scenari differenti:
 
-* stazioni che possiedono già sistemi gestionali e operativi
-* stazioni in cui GLOPS deve gestire direttamente i servizi
+- stazioni che possiedono già sistemi gestionali e operativi
+- stazioni in cui GLOPS deve gestire direttamente i servizi
 
 Di conseguenza, la proprietà dei dati non è uniforme.
 
-Principio generale:
+### Principio generale
 
-* se esiste già un sistema dedicato, quel sistema rimane la source of truth
-* se il sistema non esiste, GLOPS diventa il layer principale di gestione e persistenza
+- se esiste già un sistema dedicato, quel sistema rimane la **source of truth**
+- se il sistema non esiste, GLOPS diventa il layer principale di gestione e persistenza
+
+### Modello backend attualmente previsto
+
+**Backend applicativo**
+
+- NestJS
+- Prisma ORM
+- MySQL
+- API RESTful
 
 Il backend GLOPS assume principalmente un ruolo di:
 
-* orchestration layer
-* integration layer
-* persistence layer
-* audit/reconciliation layer
+- orchestration layer
+- business/application layer
+- persistence layer
+- audit/reconciliation layer
+
+### Communication / Integration Middleware
+
+Le comunicazioni con framework o protocolli esterni (IFSF, LON/IP, ecc.) risultano demandate
+a middleware/layer di comunicazione dedicati.
+
+Questo layer ha il compito di:
+
+- tradurre messaggi e protocolli tecnici
+- isolare il backend dai dettagli IFSF/LON/IP
+- normalizzare eventi e messaggi
+- facilitare l'integrazione con sistemi esterni
+
+Il middleware non rappresenta il business backend principale della piattaforma,
+ma un layer tecnico di integrazione/comunicazione.
 
 ---
 
-# 3. Scenario A — Stazione con sistemi esistenti
+## 3. High-Level Architecture
 
-In questo scenario la stazione possiede già servizi operativi dedicati (POS bar, autolavaggio, loyalty system, ecc.).
+```mermaid
+flowchart LR
+    A[Frontend / eShop / OPT UI]
+    B[GLOPS Backend\nNestJS + Prisma + MySQL]
+    C[Communication Middleware\nNode.js / IFSF Translation]
+    D[IFSF / LON-IP Systems]
+    E[External Station Systems]
+    F[Bar POS]
+    G[Car Wash Controller]
+    H[Loyalty Provider]
+
+    A -->|REST API| B
+    B <-->|commands / events| C
+    C <--> D
+    D <--> E
+    E --> F
+    E --> G
+    E --> H
+```
+
+### Osservazioni architetturali
+
+- Il backend applicativo GLOPS rimane separato dal layer di traduzione IFSF/LON/IP.
+- Il middleware Node.js gestisce principalmente comunicazioni tecniche/protocollari.
+- Il backend mantiene la logica applicativa, persistence e orchestration.
+- Il frontend/eShop comunica con il backend tramite API RESTful.
+
+---
+
+## 4. Scenario A — Stazione con sistemi esistenti
+
+In questo scenario la stazione possiede già servizi operativi dedicati
+(POS bar, autolavaggio, loyalty system, ecc.).
 
 GLOPS si occupa principalmente di orchestrazione e integrazione.
 
@@ -52,49 +110,58 @@ GLOPS si occupa principalmente di orchestrazione e integrazione.
 flowchart TD
     A[OPT Frontend] --> B[GLOPS Backend]
     B --> C[(Central Database)]
-    B <--> D[Integration Layer]
-    D <--> E[External Station System]
+    B <-->|commands / events| D[Communication / Integration Middleware]
+    D <--> E[IFSF / External Station Systems]
     E --> F[Bar POS]
     E --> G[Car Wash Controller]
     E --> H[Loyalty Provider]
 ```
 
-## Responsabilità dei sistemi esterni
+### Responsabilità dei sistemi esterni
 
 I sistemi esterni possono mantenere:
 
-* cataloghi
-* disponibilità prodotti
-* inventory
-* logiche operative
-* gestione locale dei servizi
+- cataloghi
+- disponibilità prodotti
+- inventory
+- logiche operative
+- gestione locale dei servizi
 
-## Responsabilità GLOPS
+### Responsabilità del middleware di comunicazione
 
-Il backend GLOPS gestisce invece:
+Il middleware gestisce principalmente:
 
-* session lifecycle
-* orchestrazione ordini
-* tracking pagamenti
-* fulfillment tracking
-* audit/event history
-* integrazioni centralizzate
+- traduzione dei messaggi IFSF/LON/IP
+- normalizzazione messaggi verso backend/eShop
+- comunicazione con sistemi esterni compatibili
+- isolamento del backend dai dettagli protocollari
 
-## Persistenza dati
+### Responsabilità GLOPS backend
+
+Il backend GLOPS gestisce:
+
+- session lifecycle
+- orchestrazione ordini
+- tracking pagamenti
+- fulfillment tracking
+- audit/event history
+- integrazioni centralizzate applicative
+
+### Persistenza dati
 
 In questo scenario GLOPS salva solamente i dati necessari per:
 
-* auditabilità
-* monitoring
-* session continuity
-* reconciliation
-* tracking operativo
+- auditabilità
+- monitoring
+- session continuity
+- reconciliation
+- tracking operativo
 
 I dettagli operativi rimangono nei sistemi esterni.
 
 ---
 
-# 4. Scenario B — Servizi gestiti direttamente da GLOPS
+## 5. Scenario B — Servizi gestiti direttamente da GLOPS
 
 In questo scenario la stazione non possiede sistemi dedicati.
 
@@ -110,74 +177,79 @@ flowchart TD
     D --> G[Catalog Management]
 ```
 
-## Responsabilità GLOPS
+### Responsabilità GLOPS
 
 Il backend gestisce direttamente:
 
-* cataloghi
-* ordini
-* stato fulfillment
-* loyalty integration
-* payment association
-* audit/event history
+- cataloghi
+- ordini
+- stato fulfillment
+- loyalty integration
+- payment association
+- audit/event history
 
-L’attivazione hardware continua comunque a passare tramite layer esterni compatibili con IFSF/HyperITech.
+L'attivazione hardware continua comunque a passare tramite:
 
-## Persistenza dati
+- middleware di comunicazione
+- layer IFSF/HyperITech
+- sistemi compatibili esterni
+
+### Persistenza dati
 
 In questo scenario GLOPS diventa la source of truth per:
 
-* cataloghi
-* ordini
-* sessioni
-* fulfillment states
-* payment references
-* audit history
+- cataloghi
+- ordini
+- sessioni
+- fulfillment states
+- payment references
+- audit history
 
 ---
 
-# 5. Payment Flow
+## 6. Payment Flow
 
 Il pagamento viene trattato come flusso asincrono esterno.
 
-Il backend non esegue direttamente il pagamento, ma osserva e riconcilia gli stati ricevuti dai provider.
+Il backend non esegue direttamente il pagamento, ma osserva, traccia e riconcilia
+gli stati ricevuti dai provider esterni.
 
 ```mermaid
 flowchart TD
     A[User Initiates Payment] --> B[OPT / Payment Infrastructure]
     B --> C[External Payment Provider]
-    C -->|Async result| D[Frontend / Backend receive status]
+    C -->|Async Result| D[Frontend / Backend receive status]
     D --> E[GLOPS updates order state]
     E --> F[(Central Database)]
     E -->|Failed / Unknown| G[Reconciliation Flow]
 ```
 
-## Responsabilità backend
+### Responsabilità backend
 
-* payment tracking
-* gestione tentativi multipli
-* reconciliation
-* timeout handling
-* audit persistence
-* idempotent updates
+- payment tracking
+- gestione tentativi multipli
+- reconciliation
+- timeout handling
+- audit persistence
+- idempotent updates
 
-## Stati principali
+### Stati principali
 
-| State                   | Descrizione                 |
-| ----------------------- | --------------------------- |
-| INITIATED               | Tentativo creato            |
-| PENDING_CONFIRMATION    | In attesa conferma provider |
-| CONFIRMED               | Pagamento confermato        |
-| FAILED                  | Pagamento fallito           |
-| EXPIRED                 | Timeout                     |
-| UNKNOWN                 | Stato non affidabile        |
-| REQUIRES_RECONCILIATION | Verifica necessaria         |
+| State                   | Descrizione                      |
+| ----------------------- | -------------------------------- |
+| INITIATED               | Tentativo creato                 |
+| PENDING_CONFIRMATION    | In attesa conferma provider      |
+| CONFIRMED               | Pagamento confermato             |
+| FAILED                  | Pagamento fallito                |
+| EXPIRED                 | Timeout                          |
+| UNKNOWN                 | Stato non affidabile             |
+| REQUIRES_RECONCILIATION | Verifica manuale necessaria      |
 
 > Lo stato `UNKNOWN` non deve mai essere trattato immediatamente come `FAILED`.
 
 ---
 
-# 6. Persistenza dati — panoramica
+## 7. Persistenza dati — panoramica
 
 | Data Category        | Primary Owner           | Persistence           | Caratteristiche           |
 | -------------------- | ----------------------- | --------------------- | ------------------------- |
@@ -189,63 +261,122 @@ flowchart TD
 | Fulfillment tracking | GLOPS                   | Central Database      | monitoraggio operativo    |
 | Audit/Event history  | GLOPS                   | Central Database      | troubleshooting + audit   |
 | Multimedia content   | Xibo                    | Xibo infrastructure   | gestione esterna          |
+| IFSF communication   | Middleware dedicato     | Da definire           | traduzione protocollo     |
 
 ---
 
-# 7. SDK Boundary
+## 8. Integration Boundaries
 
-Le interazioni SDK risultano frontend-driven.
+Esistono due percorsi di integrazione distinti e indipendenti.
 
-Il backend non comunica direttamente con il layer SDK del terminale.
+### Percorso 1 — Frontend ↔ OpenOSP SDK
+
+Il frontend gestisce direttamente l'interazione con l'hardware locale del terminale tramite SDK.
+
+**Il backend non comunica mai direttamente con OpenOSP SDK.**
+
+Responsabilità frontend:
+
+- invocazione comandi SDK
+- barcode reader
+- print operations
+- gestione eventi terminale
+- forwarding eventi rilevanti verso backend API
+
+### Percorso 2 — Backend ↔ Node.js Middleware ↔ IFSF/LON-IP
+
+Il backend comunica con i sistemi esterni tramite un middleware dedicato alla traduzione protocollo.
+
+**Il backend non gestisce mai direttamente il protocollo IFSF/LON-IP.**
+
+Responsabilità middleware:
+
+- traduzione IFSF/LON-IP
+- integrazione protocollare
+- comunicazione sistemi esterni
+- normalizzazione messaggi
 
 ```mermaid
-flowchart TD
-    A[Frontend App - OPT] -->|SDK commands| B[OpenOSP SDK]
-    A -->|API calls| C[GLOPS Backend]
-    C --> D[(Central Database)]
+flowchart LR
+    A[Frontend / OPT App]
+    B[OpenOSP SDK]
+    C[GLOPS Backend\nNestJS + Prisma]
+    D[Node.js Communication Middleware]
+    E[IFSF / LON-IP]
+    F[External Systems]
+
+    A -->|SDK commands| B
+    B --> B1[Printer]
+    B --> B2[Barcode Reader]
+    B --> B3[Terminal Events]
+
+    A -->|REST API| C
+    C <-->|commands / events| D
+    D <--> E
+    E <--> F
 ```
 
-Il backend riceve solamente dati/eventi rilevanti tramite API.
+### Responsabilità GLOPS backend
+
+- orchestration
+- persistence
+- order/payment lifecycle
+- audit/reconciliation
+- business logic
 
 ---
 
-# 8. Open Questions
+## 9. Open Questions
 
-## Integrazione IFSF / HyperITech
+### Integrazione IFSF / HyperITech
 
-* responsabilità definitive tra backend e integration layer
-* modello finale command/reply
-* correlation ID support
-* gestione asincrona dei dispositivi
+- responsabilità definitive tra backend e communication middleware
+- ownership del middleware (backend team vs HyperITech vs layer separato)
+- separazione finale backend vs protocol translation layer
+- modello command/reply definitivo
+- correlation ID support
+- gestione asincrona dispositivi
+- persistenza necessaria lato middleware
 
-## Payment Flow
+### Payment Flow
 
-* modalità definitive di integrazione provider
-* retry/reconciliation strategy
-* delivery guarantees degli eventi
+- modalità definitive integrazione provider (Sinerpay, PayPal, Satispay)
+- retry/reconciliation strategy
+- delivery guarantees eventi
 
-## Catalog Ownership
+### Catalog Ownership
 
-* ownership in ambienti multi-station
-* sincronizzazione central/local
-* customization strategy
+- ownership in ambienti multi-station
+- sincronizzazione central/local
+- customization strategy
 
-## Operational Recovery
+### Operational Recovery
 
-* recovery dopo sessioni interrotte
-* gestione flussi incompleti
-* local vs central persistence
+- recovery sessioni interrotte
+- gestione flussi incompleti
+- local vs central persistence
+
+### Pladway / Xibo Integration
+
+- conferma integrazione con Jacopo
+- separazione tra multimedia layer e orchestration backend
 
 ---
 
-# Conclusione
+## Conclusione
 
 Questa bozza ha lo scopo di chiarire:
 
-* ownership dei dati
-* responsabilità del backend
-* modalità di persistenza
-* integrazioni con sistemi esterni
-* differenze tra scenari integration-oriented e fully-managed
+- ownership dei dati
+- responsabilità backend
+- modalità di persistenza
+- integrazioni esterne
+- separazione backend applicativo vs communication middleware
+- boundary tra SDK/OpenOSP e backend business layer
 
-Il documento verrà raffinato progressivamente man mano che emergeranno dettagli tecnici più definitivi.
+Il documento verrà raffinato progressivamente man mano che emergeranno
+dettagli tecnici più definitivi.
+
+---
+
+*Autore: Mohammadreza Ghadarjani*
