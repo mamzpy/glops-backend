@@ -1,4 +1,4 @@
-# GLOPS — Data Ownership and Communication Flows
+# GLOPS — Data Ownership and System Flows
 
 > Bozza architetturale ad alto livello.
 > Diversi aspetti del sistema risultano ancora in fase di analisi e validazione a causa delle numerose integrazioni esterne e delle informazioni tecniche non ancora definitive.
