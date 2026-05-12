@@ -358,7 +358,7 @@ flowchart LR
 
 ### Pladway / Xibo Integration
 
-- conferma integrazione con Jacopo
+- conferma integrazione 
 - separazione tra multimedia layer e orchestration backend
 
 ---
