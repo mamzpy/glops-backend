@@ -214,15 +214,7 @@ Il pagamento viene trattato come flusso asincrono esterno.
 Il backend non esegue direttamente il pagamento, ma osserva, traccia e riconcilia
 gli stati ricevuti dai provider esterni.
 
-```mermaid
-flowchart TD
-    A[User Initiates Payment] --> B[OPT / Payment Infrastructure]
-    B --> C[External Payment Provider]
-    C -->|Async Result| D[Frontend / Backend receive status]
-    D --> E[GLOPS updates order state]
-    E --> F[(Central Database)]
-    E -->|Failed / Unknown| G[Reconciliation Flow]
-```
+![GLOPS Payment Ownership Flow](./payment-flow.svg)
 
 ### Responsabilità backend
 

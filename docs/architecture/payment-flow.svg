@@ -1,0 +1,91 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrowDark" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#334155"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#c2410c"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="#f8fafc"/>
+
+  <text x="120" y="95" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="800" fill="#0f172a">GLOPS — E-shop Payment Ownership Flow</text>
+  <text x="120" y="133" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="600" fill="#64748b">High-level flow: GLOPS owns order/payment tracking; payment execution remains external and asynchronous.</text>
+
+  <!-- Boxes -->
+  <g filter="url(#shadow)">
+    <rect x="130" y="275" width="230" height="130" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  </g>
+  <text x="245" y="325" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800" fill="#0f172a">Cliente</text>
+  <text x="245" y="358" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#64748b">seleziona prodotto</text>
+  <text x="245" y="383" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#64748b">o servizio</text>
+
+  <g filter="url(#shadow)">
+    <rect x="450" y="275" width="285" height="130" rx="24" fill="#eff6ff" stroke="#93c5fd" stroke-width="2.5"/>
+  </g>
+  <text x="592" y="323" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="23" font-weight="800" fill="#0f172a">Frontend e-shop</text>
+  <text x="592" y="357" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569">OPT / monitor superiore</text>
+  <text x="592" y="382" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569">UI + payment choice</text>
+
+  <g filter="url(#shadow)">
+    <rect x="830" y="275" width="290" height="130" rx="24" fill="#eef2ff" stroke="#a5b4fc" stroke-width="2.5"/>
+  </g>
+  <text x="975" y="323" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="23" font-weight="800" fill="#0f172a">GLOPS Backend</text>
+  <text x="975" y="357" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569">Order + PaymentAttempt</text>
+  <text x="975" y="382" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569">orchestration</text>
+
+  <g filter="url(#shadow)">
+    <rect x="1230" y="275" width="255" height="130" rx="24" fill="#ecfdf5" stroke="#86efac" stroke-width="2.5"/>
+  </g>
+  <text x="1357" y="323" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="23" font-weight="800" fill="#0f172a">External PSP</text>
+  <text x="1357" y="357" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569">QR / mobile payment</text>
+  <text x="1357" y="382" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569">PayPal / Satispay / loyalty</text>
+
+  <g filter="url(#shadow)">
+    <rect x="825" y="600" width="305" height="130" rx="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  </g>
+  <text x="977" y="648" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="23" font-weight="800" fill="#0f172a">GLOPS Database</text>
+  <text x="977" y="682" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569">Orders / PaymentAttempts</text>
+  <text x="977" y="707" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569">status + audit trail</text>
+
+  <g filter="url(#shadow)">
+    <rect x="1230" y="600" width="255" height="130" rx="24" fill="#fffbeb" stroke="#facc15" stroke-width="2"/>
+  </g>
+  <text x="1357" y="648" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="23" font-weight="800" fill="#0f172a">Reconciliation</text>
+  <text x="1357" y="682" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569">UNKNOWN / timeout</text>
+  <text x="1357" y="707" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="600" fill="#475569">verify + resolve</text>
+
+  <!-- Arrows and labels -->
+  <line x1="360" y1="340" x2="450" y2="340" stroke="#334155" stroke-width="3" marker-end="url(#arrowDark)"/>
+  <text x="405" y="315" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="800" fill="#475569">scelta</text>
+
+  <line x1="735" y1="340" x2="830" y2="340" stroke="#334155" stroke-width="3" marker-end="url(#arrowDark)"/>
+  <text x="782" y="312" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800" fill="#475569">ordine + metodo</text>
+  <text x="782" y="331" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800" fill="#475569">pagamento</text>
+
+  <line x1="1120" y1="340" x2="1230" y2="340" stroke="#2563eb" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <text x="1175" y="314" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="800" fill="#2563eb">inizializza pagamento</text>
+
+  <path d="M1357 275 C1357 205, 1035 210, 975 275" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="12 10" marker-end="url(#arrowBlue)"/>
+  <text x="1160" y="190" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="800" fill="#2563eb">callback / esito asincrono</text>
+
+  <line x1="975" y1="405" x2="975" y2="600" stroke="#334155" stroke-width="3" marker-end="url(#arrowDark)"/>
+  <text x="996" y="514" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="800" fill="#334155">persistenza stato + audit</text>
+
+  <path d="M1110 405 C1195 475, 1300 510, 1357 600" fill="none" stroke="#c2410c" stroke-width="3" marker-end="url(#arrowOrange)"/>
+  <text x="1282" y="525" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="800" fill="#c2410c">se incerto</text>
+
+  <line x1="1230" y1="665" x2="1130" y2="665" stroke="#c2410c" stroke-width="3" marker-end="url(#arrowOrange)"/>
+  <text x="1180" y="640" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="800" fill="#c2410c">stato verificato</text>
+
+  <!-- Note -->
+  <rect x="130" y="785" width="1355" height="50" rx="14" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="155" y="817" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" fill="#64748b">Nota: il pagamento fuel gestito dal terminale Gilbarco rimane fuori dal dominio GLOPS; non è mostrato nel diagramma.</text>
+</svg>
