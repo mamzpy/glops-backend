@@ -14,8 +14,9 @@
     </marker>
   </defs>
 
-  <text x="120" y="95" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="800" fill="#0f172a">GLOPS — E-shop Payment Ownership Flow</text>
-  <text x="120" y="133" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="600" fill="#64748b">High-level flow: GLOPS owns order/payment tracking; payment execution remains external and asynchronous.</text>
+  <text x="120" y="95" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="800" fill="#e5e7eb">GLOPS — E-shop Payment Ownership Flow</text>
+
+  <text x="120" y="133" font-family="Inter, Arial, sans-serif" font-size="19" font-weight="600" fill="#94a3b8">High-level flow: GLOPS owns order/payment tracking; payment execution remains external and asynchronous.</text>
 
   <!-- Boxes -->
   <g filter="url(#shadow)">
