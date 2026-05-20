@@ -1,0 +1,2 @@
+export const XIBO_HTTP_TIMEOUT = 10_000;
+export const XIBO_TOKEN_EXPIRY_BUFFER_MS = 60_000;

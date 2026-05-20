@@ -13,6 +13,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { FulfillmentModule } from './modules/fulfillment/fulfillment.module';
 import { ContentModule } from './modules/content/content.module';
 import { DatabaseModule } from './infrastructure/database/database.module';
+import { XiboModule } from './infrastructure/external/xibo/xibo.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { DatabaseModule } from './infrastructure/database/database.module';
     FulfillmentModule,
     ContentModule,
     DatabaseModule,
+    XiboModule,
   ],
   controllers: [],
   providers: [],
