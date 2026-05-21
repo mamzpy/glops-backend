@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Body, Post } from '@nestjs/common';
+import { Controller, Get, Body, Post, Query } from '@nestjs/common';
 import { XiboService } from './xibo.service';
 import { CreateXiboScheduleEventDto } from './dto/create-xibo-schedule-event.dto';
+import { GetXiboScheduleEventsDto } from './dto/get-xibo-schedule-events.dto';
 
 @Controller('xibo')
 export class XiboController {
@@ -31,9 +32,11 @@ export class XiboController {
     return this.xiboService.getCampaigns();
   }
 
-  @Get('display-groups/:displayGroupId/schedule-events')
-  async getScheduleEvents(@Param('displayGroupId') displayGroupId: string) {
-    return this.xiboService.getScheduleEvents(Number(displayGroupId));
+  @Get('schedule-events')
+  getScheduleEvents(
+    @Query() query: GetXiboScheduleEventsDto,
+  ): Promise<unknown> {
+    return this.xiboService.getScheduleEvents(query);
   }
 
   @Post('schedule-events')

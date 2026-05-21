@@ -7,6 +7,8 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
+import { GetXiboScheduleEventsDto } from './dto/get-xibo-schedule-events.dto';
+
 import { CreateXiboScheduleEventDto } from './dto/create-xibo-schedule-event.dto';
 import { XiboTokenResponseDto } from './dto/xibo-token-response.dto';
 import { XiboAuthToken } from './xibo.types';
@@ -101,8 +103,41 @@ export class XiboService {
     return this.get('/api/campaign');
   }
 
-  async getScheduleEvents(displayGroupId: number): Promise<unknown> {
-    return this.get(`/api/schedule/${displayGroupId}/events`);
+  async getScheduleEvents(query: GetXiboScheduleEventsDto): Promise<unknown> {
+    const params = new URLSearchParams();
+
+    if (query.displayGroupId !== undefined) {
+      params.append('displayGroupIds[]', String(query.displayGroupId));
+    }
+
+    if (query.eventTypeId !== undefined) {
+      params.append('eventTypeId', String(query.eventTypeId));
+    }
+
+    if (query.campaignId !== undefined) {
+      params.append('campaignId', String(query.campaignId));
+    }
+
+    if (query.fromDt !== undefined) {
+      params.append('fromDt', query.fromDt);
+    }
+
+    if (query.toDt !== undefined) {
+      params.append('toDt', query.toDt);
+    }
+
+    if (query.geoAware !== undefined) {
+      params.append('geoAware', String(query.geoAware));
+    }
+
+    if (query.recurring !== undefined) {
+      params.append('recurring', String(query.recurring));
+    }
+
+    const queryString = params.toString();
+    const url = queryString ? `/api/schedule?${queryString}` : '/api/schedule';
+
+    return this.get(url);
   }
 
   async createScheduleEvent(
