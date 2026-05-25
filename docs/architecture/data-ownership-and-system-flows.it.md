@@ -138,21 +138,21 @@ flowchart TD
 
 GLOPS persiste:
 
-sessione
-ordine
-payment attempts
-riferimenti PSP
-callback/stati di pagamento
-stato fulfillment, se gestito dal flow e-shop
-audit/event history
-riferimenti minimi a sistemi esterni
+- sessione
+- ordine
+- payment attempts
+- riferimenti PSP
+- callback/stati di pagamento
+- stato fulfillment, se gestito dal flow e-shop
+- audit/event history
+- riferimenti minimi a sistemi esterni
 
 GLOPS non persiste necessariamente:
 
-inventory completo dello shop
-quantità stock real-time
-dati interni di POS/bar locale
-dati operativi già posseduti dalla stazione
+- inventory completo dello shop
+- quantità stock real-time
+- dati interni di POS/bar locale
+- dati operativi già posseduti dalla stazione
 
 ---
 
@@ -258,7 +258,6 @@ flowchart LR
     POS["POS carburante\nfuori scope e-shop"]
 ```
 
-### Lifecycle PaymentAttempt
 
 ### Lifecycle PaymentAttempt
 
@@ -314,7 +313,6 @@ flowchart LR
     SDK -->|"local events"| FE
     FE -->|"relevant event forwarding"| BE
 
-    NOTE["Backend boundary:\nno direct SDK calls"]
 
     subgraph SDKDETAILS["SDK capabilities"]
         PRINT["Printer"]
