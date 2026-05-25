@@ -20,17 +20,6 @@ Il focus di OR1-90 è chiarire:
 Il documento non è una specifica implementativa definitiva.
 Serve a fissare una posizione architetturale iniziale per le scelte backend.
 
-### Fuori perimetro
-
-Non vengono trattati in dettaglio:
-
-- API Xibo CMS
-- passaggio inventory verso Xibo/Pladway
-- API di ritorno Pladway per impression/reporting
-- logiche DOOH, palinsesto advertising, auction e revenue share
-- setup Docker o installazione locale di sistemi esterni
-
-Questi aspetti appartengono a task separati.
 
 ---
 
@@ -38,20 +27,23 @@ Questi aspetti appartengono a task separati.
 
 Nel flusso e-shop, il backend GLOPS agisce come **application orchestration and persistence layer**.
 
+
 Il backend deve:
 
 - orchestrare sessione, ordine, pagamento e fulfillment
+- inizializzare e gestire il flusso di pagamento e-shop tramite PSP esterni, ad esempio QR/mobile payment
 - mantenere lo stato persistente del flow
-- tracciare tentativi di pagamento e stati asincroni
+- tracciare tentativi di pagamento, stati asincroni, callback e timeout
 - integrare sistemi esterni tramite API o middleware
 - fornire auditabilità e supporto alla reconciliation
 - esporre API verso il frontend OPT
+
 
 Il backend non deve:
 
 - comunicare direttamente con OpenOSP SDK
 - controllare direttamente POS, pump, printer o barcode reader
-- eseguire direttamente il pagamento
+- eseguire direttamente la transazione come payment processor certificato
 - sostituire automaticamente eventuali sistemi gestionali già presenti nella stazione
 - gestire necessariamente inventory real-time di magazzino
 
@@ -61,53 +53,27 @@ Il backend non deve:
 
 ```mermaid
 flowchart LR
-    subgraph OPT["OPT / Terminale"]
-        UI["E-Shop UI\nCanale superiore OPT"]
-        SDK["OpenOSP SDK\nPrinter / Barcode / Terminal events"]
-        POS["POS carburante\nCanale inferiore"]
-    end
+    OPT["OPT / Terminale\nE-Shop Frontend UI"]
+    BE["GLOPS Backend\nOrchestration / state / audit"]
+    PSP["External PSP\nQR / mobile payment"]
+    MW["Integration Middleware"]
+    STATION["Station systems\nBar / Shop / Services"]
 
-    subgraph BE["GLOPS Backend"]
-        API["REST API"]
-        ORDER["Order lifecycle"]
-        PAY["PaymentAttempt tracking"]
-        AUDIT["Audit / Event history"]
-        DB[("GLOPS DB")]
-    end
-
-    subgraph EXT["External Systems"]
-        PSP["External PSP\nQR / mobile payment"]
-        MW["Integration Middleware"]
-        STATION["Station systems\nBar / Shop / Services"]
-    end
-
-    UI -->|"REST API"| API
-    UI -->|"local SDK calls"| SDK
-
-    API --> ORDER
-    API --> PAY
-    API --> AUDIT
-
-    ORDER --> DB
-    PAY --> DB
-    AUDIT --> DB
-
-    PAY <-->|"payment init / status / callback"| PSP
-    ORDER <-->|"commands / events"| MW
+    OPT -->|"REST API"| BE
+    BE <-->|"payment init / status / callback"| PSP
+    BE <-->|"commands / events"| MW
     MW <-->|"station integration"| STATION
-
-    POS -. "not used for e-shop payment" .- PAY
-    SDK -. "not called directly by backend" .- API
 ```
 
 ### Note principali
 
 - Il frontend OPT comunica con il backend tramite API REST.
-- Lo SDK/OpenOSP rimane nel perimetro frontend/OPT.
+- Lo SDK/OpenOSP rimane nel perimetro frontend/OPT e non viene invocato direttamente dal backend.
 - Il backend mantiene ownership applicativa di ordine, pagamento, audit e stati del processo.
-- Il pagamento e-shop è esterno e asincrono.
-- Il POS carburante non viene utilizzato per pagamenti e-shop.
-- I sistemi di stazione vengono integrati tramite middleware o API, non tramite accesso diretto dal backend ai protocolli locali.
+- Il backend orchestra il pagamento e-shop tramite PSP esterni, gestendo inizializzazione, stati, callback asincrone e riconciliazione.
+- L’esecuzione della transazione di pagamento rimane responsabilità del PSP esterno.
+- Il POS carburante rimane fuori dal flow e-shop e non viene considerato parte del pagamento e-shop gestito da GLOPS.
+- I sistemi di stazione vengono integrati tramite middleware o API, non tramite accesso diretto del backend ai protocolli locali.
 
 ---
 
@@ -133,7 +99,7 @@ La proprietà dei dati non è uniforme. Alcuni domini sono sempre di responsabil
 
 ### Posizione su inventory
 
-Per il primo scenario e-shop non si assume che GLOPS gestisca stock real-time completo.
+Per il primo scenario e-shop non si assume che GLOPS gestisca uno stock real-time completo.
 
 Il modello atteso è più vicino a:
 
@@ -150,7 +116,7 @@ Questo evita di trasformare il backend e-shop in un sostituto completo dell'inve
 
 ### Scenario A — Stazione con sistemi esistenti
 
-La stazione possiede già sistemi operativi o gestionali per shop, bar, servizi locali, disponibilità prodotti o fulfillment.
+La stazione possiede già sistemi operativi o gestionali per shop, bar, servizi locali, disponibilità dei prodotti o fulfillment.
 
 In questo caso GLOPS non sostituisce automaticamente tali sistemi.
 Il backend opera come orchestration layer e persiste solo ciò che serve al flow e-shop GLOPS.
@@ -166,27 +132,27 @@ flowchart TD
     BE <-->|"commands / events"| MW["Integration Middleware"]
     MW <-->|"integration"| EXT["Existing station systems\nbar / shop / services"]
 
-    EXT -->|"operational truth"| LOCAL[("External/local data\navailability, fulfillment, service status")]
+    EXT -->|"operational source of truth"| LOCAL[("External/local data\navailability, fulfillment, service status")]
     BE -. "does not own full operational data" .- LOCAL
 ```
 
-**GLOPS persiste:**
+GLOPS persiste:
 
-- sessione
-- ordine
-- payment attempts
-- riferimenti PSP
-- callback/stati di pagamento
-- tracking fulfillment
-- audit/event history
-- riferimenti minimi a sistemi esterni
+sessione
+ordine
+payment attempts
+riferimenti PSP
+callback/stati di pagamento
+stato fulfillment, se gestito dal flow e-shop
+audit/event history
+riferimenti minimi a sistemi esterni
 
-**GLOPS non persiste necessariamente:**
+GLOPS non persiste necessariamente:
 
-- inventory completo dello shop
-- quantità stock real-time
-- dati interni di POS/bar locale
-- dati operativi già posseduti dalla stazione
+inventory completo dello shop
+quantità stock real-time
+dati interni di POS/bar locale
+dati operativi già posseduti dalla stazione
 
 ---
 
@@ -198,26 +164,25 @@ La stazione non espone un sistema esterno completo per il flusso e-shop, oppure 
 flowchart TD
     UI["OPT E-Shop UI"] --> BE["GLOPS Backend"]
 
-    BE --> OFFERS[("E-shop offers")]
-    BE --> ORDERS[("Orders")]
-    BE --> PAYMENTS[("Payment attempts")]
-    BE --> AUDIT[("Audit events")]
+    subgraph DATA["GLOPS-owned data"]
+        OFFERS[("E-shop offers")]
+        ORDERS[("Orders")]
+        PAYMENTS[("Payment attempts")]
+        AUDIT[("Audit events")]
+    end
+
+    BE --> OFFERS
+    BE --> ORDERS
+    BE --> PAYMENTS
+    BE --> AUDIT
 
     BE -->|"payment init"| PSP["External PSP"]
-    PSP -->|"async confirmation"| BE
+    PSP -->|"callback"| BE
 
-    BE -->|"fulfillment instruction / status"| SERVICE["Shop / Bar / Service operator"]
-    SERVICE -->|"manual or system confirmation"| BE
+    BE -->|"fulfillment request"| SERVICE["Shop / Bar / Service operator"]
+    SERVICE -->|"confirmation"| BE
+
 ```
-
-In questo scenario il backend può gestire:
-
-- prodotti/offerte e-shop selezionati
-- disponibilità logica dell'offerta sullo specifico OPT
-- lifecycle ordine
-- payment attempts
-- stato fulfillment
-- audit e reconciliation
 
 Anche in questo scenario, GLOPS non deve essere considerato automaticamente owner di quantità stock real-time.
 
@@ -254,18 +219,25 @@ sequenceDiagram
     BE->>DB: Update Order status
 
     alt Payment confirmed
-        BE-->>UI: Payment confirmed
-        BE->>EXT: Notify order for fulfillment
-        BE->>DB: Persist fulfillment tracking event
-    else Payment failed / expired / unknown
-        BE->>DB: Persist failure/unknown state
+        UI->>BE: Poll payment/order status
+        BE-->>UI: Return payment confirmed
+        BE->>EXT: Send fulfillment request
+        BE->>DB: Persist fulfillment event/status
+    else Payment failed / expired
+        BE->>DB: Persist failure/expired state
+        UI->>BE: Poll payment/order status
         BE-->>UI: Return payment status / retry handling
+    else Payment unknown / timeout
+        BE->>DB: Persist UNKNOWN / requires reconciliation
+        UI->>BE: Poll payment/order status
+        BE-->>UI: Return pending/unknown status
     end
 ```
 
-Il pagamento e-shop è un processo esterno e asincrono.
 
-Il backend crea e traccia un `PaymentAttempt`, riceve o recupera l'esito dal provider esterno e aggiorna lo stato dell'ordine solo quando l'esito è affidabile.
+Il pagamento e-shop è un processo orchestrato da GLOPS ma eseguito tramite PSP esterni.
+
+Il backend crea e traccia un `PaymentAttempt`, inizializza il pagamento presso il provider esterno, riceve o recupera l'esito tramite callback/status check e aggiorna lo stato dell'ordine solo quando l'esito è affidabile.
 
 ```mermaid
 flowchart LR
@@ -283,12 +255,14 @@ flowchart LR
 
     BE --> FUL["Fulfillment\nShop / Bar / Service"]
 
-    POS["POS carburante"] -. "fuori scope e-shop" .- BE
+    POS["POS carburante\nfuori scope e-shop"]
 ```
 
 ### Lifecycle PaymentAttempt
 
-Il seguente diagramma rappresenta il lifecycle logico di un singolo PaymentAttempt, non l'intero flow ordine/pagamento.
+### Lifecycle PaymentAttempt
+
+Il seguente diagramma rappresenta il lifecycle logico di un singolo `PaymentAttempt`, non l'intero flow ordine/pagamento.
 
 ```mermaid
 stateDiagram-v2
@@ -316,9 +290,9 @@ stateDiagram-v2
 - Ogni tentativo deve essere persistito.
 - Gli update di pagamento devono essere idempotenti.
 - `UNKNOWN` non deve essere trattato immediatamente come `FAILED`.
-- Timeout e callback mancanti richiedono reconciliation.
+- Timeout, callback mancanti o callback tardive richiedono reconciliation.
 - L'ordine può passare a fulfillment solo dopo pagamento confermato.
-- Il POS carburante non è usato per il pagamento e-shop.
+- Il POS carburante non è parte del flow di pagamento e-shop.
 
 ---
 
@@ -327,7 +301,7 @@ stateDiagram-v2
 Il boundary SDK è una separazione architetturale centrale.
 
 Il frontend/OPT può interagire con OpenOSP SDK.
-Il backend non deve comunicare direttamente con lo SDK.
+Il backend non comunica direttamente con lo SDK.
 
 ```mermaid
 flowchart LR
@@ -335,16 +309,16 @@ flowchart LR
     BE["GLOPS Backend\nREST API"]
     SDK["OpenOSP SDK\nLocal capabilities"]
 
-    FE -->|"REST"| BE
+    FE -->|"REST API"| BE
     FE -->|"SDK calls"| SDK
     SDK -->|"local events"| FE
-    FE -->|"event forwarding"| BE
+    FE -->|"relevant event forwarding"| BE
 
-    BE -. "no direct SDK calls" .- SDK
+    NOTE["Backend boundary:\nno direct SDK calls"]
 
     subgraph SDKDETAILS["SDK capabilities"]
         PRINT["Printer"]
-        BARCODE["Barcode / QR reader"]
+        BARCODE["Barcode / QR reader\nif required"]
         EVENTS["Terminal events"]
     end
 
@@ -357,8 +331,8 @@ flowchart LR
 
 - mostrare UI e-shop
 - mostrare istruzioni QR/payment
-- invocare funzioni SDK printer
-- gestire barcode/QR reader locale se necessario
+- invocare funzioni SDK printer, se necessarie
+- gestire barcode/QR reader locale, se previsto
 - ricevere eventi terminale
 - inoltrare eventi rilevanti verso API backend
 
@@ -368,7 +342,7 @@ flowchart LR
 - ricevere eventi rilevanti dal frontend
 - persistere eventi per audit
 - decidere transizioni di stato ordine/pagamento
-- mantenere astratta l'interazione hardware
+- restare indipendente dai dettagli hardware locali
 
 Il backend non controlla direttamente:
 
@@ -391,14 +365,13 @@ Non rappresenta uno schema Prisma definitivo.
 ```mermaid
 erDiagram
     OPT ||--o{ ESHOP_SESSION : starts
-    ESHOP_SESSION ||--o{ ORDER : creates
-    ORDER ||--o{ ORDER_ITEM : contains
-    ORDER ||--o{ PAYMENT_ATTEMPT : has
-    ORDER ||--o{ FULFILLMENT_EVENT : tracks
-    ORDER ||--o{ RECEIPT : generates
-    ORDER ||--o{ AUDIT_EVENT : logs
+    ESHOP_SESSION ||--o{ ESHOP_ORDER : creates
+    ESHOP_ORDER ||--o{ ORDER_ITEM : contains
+    ESHOP_ORDER ||--o{ PAYMENT_ATTEMPT : has
+    ESHOP_ORDER ||--o{ FULFILLMENT_EVENT : tracks
+    ESHOP_ORDER ||--o{ AUDIT_EVENT : logs
     PAYMENT_ATTEMPT ||--o{ PAYMENT_EVENT : receives
-    OPT ||--o{ AUDIT_EVENT : emits
+    OPT ||--o{ AUDIT_EVENT : originates
 
     OPT {
         string id
@@ -410,14 +383,16 @@ erDiagram
     ESHOP_SESSION {
         string id
         string optId
+        string stationId
         string status
         datetime startedAt
         datetime expiresAt
     }
 
-    ORDER {
+    ESHOP_ORDER {
         string id
         string sessionId
+        string stationId
         string status
         decimal totalAmount
         string currency
@@ -440,6 +415,8 @@ erDiagram
         string provider
         string providerReference
         string status
+        decimal amount
+        string currency
         datetime createdAt
         datetime updatedAt
     }
@@ -450,14 +427,6 @@ erDiagram
         string eventType
         string payloadHash
         datetime receivedAt
-    }
-
-    RECEIPT {
-        string id
-        string orderId
-        string receiptNumber
-        string status
-        datetime generatedAt
     }
 
     FULFILLMENT_EVENT {
@@ -478,14 +447,14 @@ erDiagram
 
 ### Principi di persistenza
 
-- Stato ordine e pagamento devono essere persistiti centralmente.
-- I payment attempts devono supportare audit e reconciliation.
+- Stato ordine e pagamento devono essere persistiti centralmente dal backend GLOPS.
+- I payment attempts devono supportare audit, idempotenza e reconciliation.
 - I riferimenti del provider esterno devono essere salvati.
-- Gli eventi frontend/SDK rilevanti devono essere salvati.
-- Lo stato di fulfillment deve essere tracciato anche se l'esecuzione avviene esternamente.
-- Le quantità inventory non devono essere introdotte se non richieste esplicitamente dallo scenario finale.
-- Gli audit events devono permettere la ricostruzione del flow principale.
-
+- Gli eventi frontend/SDK rilevanti devono essere salvati solo se utili al flow, all’audit o alla diagnostica.
+- Lo stato di fulfillment deve essere tracciato quando necessario al flow e-shop, anche se l’esecuzione operativa avviene esternamente.
+- Le quantità inventory real-time non devono essere introdotte se non richieste esplicitamente dallo scenario finale.
+- Gli audit events devono permettere la ricostruzione del flow principale ordine/pagamento/fulfillment.
+  
 ---
 
 ## 9. Open questions
@@ -528,14 +497,14 @@ Il backend possiede:
 - transizioni di stato pagamento
 - audit/event history
 - supporto alla reconciliation
-- fulfillment tracking dal punto di vista GLOPS
+- stato/eventi fulfillment dal punto di vista GLOPS
 
 Il backend non possiede:
 
 - interazione diretta con SDK/OpenOSP
-- esecuzione pagamento tramite POS carburante
+- flow di pagamento carburante/POS
 - esecuzione fisica della stampa
-- transazione di pagamento del PSP esterno
+- esecuzione certificata della transazione di pagamento del PSP esterno
 - inventory real-time completo della stazione, salvo richiesta esplicita
 - dettagli interni dei sistemi esterni
 
