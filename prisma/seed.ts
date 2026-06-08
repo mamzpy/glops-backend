@@ -1,36 +1,68 @@
 import * as bcrypt from 'bcrypt';
 
-import { PrismaClient, DeviceStatus } from '@prisma/client';
+import { DeviceStatus, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function main(): Promise<void> {
-  const plainSecret = 'test-secret';
+async function upsertDevice(params: {
+  deviceId: string;
+  stationId: string;
+  plainSecret: string;
+  type: string;
+}) {
+  const secretHash = await bcrypt.hash(params.plainSecret, 10);
 
-  const secretHash = await bcrypt.hash(plainSecret, 10);
-
-  const device = await prisma.device.upsert({
+  return prisma.device.upsert({
     where: {
-      deviceId: 'otp-terminal-01',
+      deviceId: params.deviceId,
     },
     update: {
       secretHash,
+      stationId: params.stationId,
+      type: params.type,
       status: DeviceStatus.ACTIVE,
     },
     create: {
-      deviceId: 'otp-terminal-01',
+      deviceId: params.deviceId,
       secretHash,
-      stationId: 'station-001',
-      type: 'OTP_TERMINAL',
+      stationId: params.stationId,
+      type: params.type,
       status: DeviceStatus.ACTIVE,
     },
   });
+}
 
-  console.log('Seeded device:', {
-    deviceId: device.deviceId,
-    stationId: device.stationId,
-    secret: plainSecret,
+async function main(): Promise<void> {
+  const plainSecret = process.env.SEED_DEVICE_SECRET ?? 'test-secret';
+
+  const device1 = await upsertDevice({
+    deviceId: 'opt-terminal-01',
+    stationId: 'station-001',
+    plainSecret,
+    type: 'OPT_TERMINAL',
   });
+
+  const device2 = await upsertDevice({
+    deviceId: 'opt-terminal-02',
+    stationId: 'station-002',
+    plainSecret,
+    type: 'OPT_TERMINAL',
+  });
+
+  console.log('Seeded devices:', [
+    {
+      deviceId: device1.deviceId,
+      stationId: device1.stationId,
+      type: device1.type,
+      status: device1.status,
+    },
+    {
+      deviceId: device2.deviceId,
+      stationId: device2.stationId,
+      type: device2.type,
+      status: device2.status,
+    },
+  ]);
 }
 
 main()

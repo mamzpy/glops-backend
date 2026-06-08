@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
@@ -10,8 +9,12 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
 
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -21,7 +24,6 @@ async function bootstrap() {
   );
 
   const port = configService.get<number>('app.port') ?? 3000;
-
   await app.listen(port);
   logger.log(`Application running on http://localhost:${port}`);
 }

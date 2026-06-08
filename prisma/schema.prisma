@@ -26,3 +26,58 @@ enum DeviceStatus {
   BLOCKED
   MAINTENANCE
 }
+
+model Order {
+  id        String      @id @default(uuid())
+  stationId String
+  deviceId  String
+  items     OrderItem[]
+  status    OrderStatus @default(CREATED)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  paymentAttempt PaymentAttempt?
+}
+
+model OrderItem {
+  id              String @id @default(uuid())
+  orderId         String
+  externalOfferId String
+  offerName       String
+  price           Float
+  quantity        Int
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+model PaymentAttempt {
+  id        String        @id @default(uuid())
+  orderId   String        @unique
+  status    PaymentStatus @default(INITIATED)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+enum OrderStatus {
+  CREATED
+  PENDING_PAYMENT
+  PAYMENT_IN_PROGRESS
+  PAID
+  CANCELLED
+  EXPIRED
+  FAILED
+}
+
+enum PaymentStatus {
+  INITIATED
+  PENDING_ACTION
+  PENDING_CONFIRMATION
+  CONFIRMED
+  FAILED
+  EXPIRED
+  CANCELLED
+  UNKNOWN
+  REQUIRES_RECONCILIATION
+}

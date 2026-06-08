@@ -1,0 +1,41 @@
+-- CreateTable
+CREATE TABLE `Order` (
+    `id` VARCHAR(191) NOT NULL,
+    `stationId` VARCHAR(191) NOT NULL,
+    `deviceId` VARCHAR(191) NOT NULL,
+    `status` ENUM('CREATED', 'PENDING_PAYMENT', 'PAYMENT_IN_PROGRESS', 'PAID', 'CANCELLED', 'EXPIRED', 'FAILED') NOT NULL DEFAULT 'CREATED',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `OrderItem` (
+    `id` VARCHAR(191) NOT NULL,
+    `orderId` VARCHAR(191) NOT NULL,
+    `externalOfferId` VARCHAR(191) NOT NULL,
+    `offerName` VARCHAR(191) NOT NULL,
+    `price` DOUBLE NOT NULL,
+    `quantity` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `PaymentAttempt` (
+    `id` VARCHAR(191) NOT NULL,
+    `orderId` VARCHAR(191) NOT NULL,
+    `status` ENUM('INITIATED', 'PENDING_ACTION', 'PENDING_CONFIRMATION', 'CONFIRMED', 'FAILED', 'EXPIRED', 'CANCELLED', 'UNKNOWN', 'REQUIRES_RECONCILIATION') NOT NULL DEFAULT 'INITIATED',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `PaymentAttempt_orderId_key`(`orderId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `OrderItem` ADD CONSTRAINT `OrderItem_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `PaymentAttempt` ADD CONSTRAINT `PaymentAttempt_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

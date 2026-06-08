@@ -34,4 +34,9 @@ export default () => ({
     clientId: process.env.XIBO_CLIENT_ID,
     clientSecret: process.env.XIBO_CLIENT_SECRET,
   },
+
+  strapi: {
+    baseUrl: process.env.STRAPI_BASE_URL,
+    apiToken: process.env.STRAPI_API_TOKEN,
+  },
 });
