@@ -13,6 +13,37 @@ services:
     volumes:
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
       - glops_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: glops-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  strapi:
+    build:
+      context: ../glops-strapi-test
+    container_name: glops-strapi
+    restart: unless-stopped
+    ports:
+      - "1337:1337"
+    environment:
+      DATABASE_CLIENT: sqlite
+      DATABASE_FILENAME: .tmp/data.db
+    volumes:
+      - strapi_data:/app/.tmp
 
 volumes:
   glops_mysql_data:
+  strapi_data:
