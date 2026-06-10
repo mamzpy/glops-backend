@@ -35,7 +35,7 @@ services:
 
   strapi:
     build:
-      context: ../../glops-strapi-test
+      context: ../glops-strapi-poc
     container_name: glops-strapi
     restart: unless-stopped
     ports:
