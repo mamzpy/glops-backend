@@ -26,14 +26,16 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env
+      - .env.docker
     depends_on:
       mysql:
         condition: service_healthy
+      strapi:
+        condition: service_started  
 
   strapi:
     build:
-      context: ../glops-strapi-test
+      context: ../../glops-strapi-test
     container_name: glops-strapi
     restart: unless-stopped
     ports:
