@@ -36,7 +36,6 @@ import { XiboModule } from './infrastructure/external/xibo/xibo.module';
     ContentModule,
     DatabaseModule,
     XiboModule,
-    CatalogModule
   ],
   controllers: [],
   providers: [],
