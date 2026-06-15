@@ -35,34 +35,47 @@ async function upsertDevice(params: {
 async function main(): Promise<void> {
   const plainSecret = process.env.SEED_DEVICE_SECRET ?? 'test-secret';
 
-  const device1 = await upsertDevice({
-    deviceId: 'opt-terminal-01',
-    stationId: 'station-001',
-    plainSecret,
-    type: 'OPT_TERMINAL',
-  });
-
-  const device2 = await upsertDevice({
-    deviceId: 'opt-terminal-02',
-    stationId: 'station-002',
-    plainSecret,
-    type: 'OPT_TERMINAL',
-  });
-
-  console.log('Seeded devices:', [
+  const demoDevices = [
     {
-      deviceId: device1.deviceId,
-      stationId: device1.stationId,
-      type: device1.type,
-      status: device1.status,
+      deviceId: 'opt-terminal-01',
+      stationId: 'station-001',
+      type: 'OPT_TERMINAL',
     },
     {
-      deviceId: device2.deviceId,
-      stationId: device2.stationId,
-      type: device2.type,
-      status: device2.status,
+      deviceId: 'opt-terminal-03',
+      stationId: 'station-001',
+      type: 'OPT_TERMINAL',
     },
-  ]);
+    {
+      deviceId: 'opt-terminal-04',
+      stationId: 'station-001',
+      type: 'OPT_TERMINAL',
+    },
+    {
+      deviceId: 'opt-terminal-02',
+      stationId: 'station-002',
+      type: 'OPT_TERMINAL',
+    },
+  ];
+
+  const devices = await Promise.all(
+    demoDevices.map((device) =>
+      upsertDevice({
+        ...device,
+        plainSecret,
+      }),
+    ),
+  );
+
+  console.log(
+    'Seeded devices:',
+    devices.map((device) => ({
+      deviceId: device.deviceId,
+      stationId: device.stationId,
+      type: device.type,
+      status: device.status,
+    })),
+  );
 }
 
 main()
