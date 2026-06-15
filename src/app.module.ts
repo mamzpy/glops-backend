@@ -12,6 +12,7 @@ import { OrderModule } from './modules/order/order.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { FulfillmentModule } from './modules/fulfillment/fulfillment.module';
 import { ContentModule } from './modules/content/content.module';
+import { ComposerModule } from './modules/composer/composer.module';
 import { DatabaseModule } from './infrastructure/database/database.module';
 import { XiboModule } from './infrastructure/external/xibo/xibo.module';
 import { PladwayModule } from './infrastructure/external/pladway/pladway.module';
@@ -35,6 +36,7 @@ import { PladwayModule } from './infrastructure/external/pladway/pladway.module'
     PaymentModule,
     FulfillmentModule,
     ContentModule,
+    ComposerModule,
     DatabaseModule,
     XiboModule,
     PladwayModule,
