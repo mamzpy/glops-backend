@@ -1,0 +1,47 @@
+export type PladwayVastExampleType = 'full' | 'empty' | 'wrapper' | 'html5';
+
+export type PladwayAdSource = 'PLADWAY_VAST';
+
+export interface PladwayMediaFile {
+  url: string;
+  mimeType: string | null;
+  deliveryType: string | null;
+  width: number | null;
+  height: number | null;
+}
+
+export interface PladwayTrackingUrls {
+  start: string[];
+  firstQuartile: string[];
+  midpoint: string[];
+  thirdQuartile: string[];
+  complete: string[];
+  [eventName: string]: string[];
+}
+
+export interface PladwayAdAvailableResult {
+  available: true;
+  source: PladwayAdSource;
+  priceCpm: number | null;
+  adId: string | null;
+  creativeId: string | null;
+  durationSeconds: number | null;
+  media: PladwayMediaFile;
+  impressionUrls: string[];
+  trackingUrls: PladwayTrackingUrls;
+  wrappersResolved: number | null;
+  raw?: unknown;
+}
+
+export interface PladwayAdUnavailableResult {
+  available: false;
+  source: PladwayAdSource;
+  priceCpm: number | null;
+  reason: 'EMPTY_VAST' | 'NO_LINEAR_CREATIVE' | 'NO_MEDIA_FILE' | 'VAST_ERROR';
+  errorMessage?: string;
+  raw?: unknown;
+}
+
+export type PladwayAdResult =
+  | PladwayAdAvailableResult
+  | PladwayAdUnavailableResult;

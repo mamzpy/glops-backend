@@ -14,6 +14,7 @@ import { FulfillmentModule } from './modules/fulfillment/fulfillment.module';
 import { ContentModule } from './modules/content/content.module';
 import { DatabaseModule } from './infrastructure/database/database.module';
 import { XiboModule } from './infrastructure/external/xibo/xibo.module';
+import { PladwayModule } from './infrastructure/external/pladway/pladway.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { XiboModule } from './infrastructure/external/xibo/xibo.module';
     ContentModule,
     DatabaseModule,
     XiboModule,
+    PladwayModule,
   ],
   controllers: [],
   providers: [],
