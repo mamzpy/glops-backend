@@ -45,3 +45,26 @@ export interface PladwayAdUnavailableResult {
 export type PladwayAdResult =
   | PladwayAdAvailableResult
   | PladwayAdUnavailableResult;
+
+export interface PladwayImpressionInput {
+  optId: string;
+  stationId?: string;
+  adId?: string | null;
+  creativeId?: string | null;
+  impressionUrls: string[];
+}
+
+export interface PladwayImpressionResult {
+  url: string;
+  success: boolean;
+  statusCode: number | null;
+  errorMessage?: string;
+}
+
+export interface PladwayImpressionResponse {
+  firedAt: string;
+  total: number;
+  successCount: number;
+  failureCount: number;
+  results: PladwayImpressionResult[];
+}

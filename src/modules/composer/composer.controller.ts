@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -10,6 +12,7 @@ import { CurrentDevice } from '../../common/decorators/current-device.decorator'
 import { DeviceAuthGuard } from '../../common/guards/device-auth.guard';
 import type { DeviceJwtPayload } from '../auth/types/device-jwt-payload.type';
 import { ComposerService } from './composer.service';
+import { ConfirmAdImpressionDto } from './dto/confirm-ad-impression.dto';
 
 @Controller('composer')
 export class ComposerController {
@@ -40,6 +43,21 @@ export class ComposerController {
     return this.composerService.previewAd({
       optId: device.deviceId,
       stationId: device.stationId,
+    });
+  }
+
+  @Post('ad-playback/impression')
+  @UseGuards(DeviceAuthGuard)
+  confirmAdImpression(
+    @CurrentDevice() device: DeviceJwtPayload,
+    @Body() body: ConfirmAdImpressionDto,
+  ) {
+    return this.composerService.confirmAdImpression({
+      optId: device.deviceId,
+      stationId: device.stationId,
+      adId: body.adId,
+      creativeId: body.creativeId,
+      impressionUrls: body.impressionUrls,
     });
   }
 }

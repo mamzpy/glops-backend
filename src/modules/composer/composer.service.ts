@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { PladwayService } from '../../infrastructure/external/pladway/pladway.service';
+import type { PladwayImpressionResponse } from '../../infrastructure/external/pladway/pladway.types';
 import type {
   ComposerAdPreviewInput,
   ComposerAdPreviewResponse,
@@ -33,5 +34,21 @@ export class ComposerService {
         reason: 'NOT_IMPLEMENTED',
       },
     };
+  }
+
+  async confirmAdImpression(input: {
+    optId: string;
+    stationId?: string;
+    adId?: string | null;
+    creativeId?: string | null;
+    impressionUrls: string[];
+  }): Promise<PladwayImpressionResponse> {
+    return this.pladwayService.fireImpressions({
+      optId: input.optId,
+      stationId: input.stationId,
+      adId: input.adId,
+      creativeId: input.creativeId,
+      impressionUrls: input.impressionUrls,
+    });
   }
 }
