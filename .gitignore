@@ -61,3 +61,4 @@ docker-compose.override.yml
 glops-backend-structure.txt
 
 tmp/
+storage/
