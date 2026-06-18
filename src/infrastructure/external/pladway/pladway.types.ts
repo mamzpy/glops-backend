@@ -4,6 +4,8 @@ export type PladwayAdSource = 'PLADWAY_VAST';
 
 export interface PladwayMediaFile {
   url: string;
+  cachedUrl?: string | null;
+  cacheStatus?: string | null;
   mimeType: string | null;
   deliveryType: string | null;
   width: number | null;

@@ -1,7 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-arm64-openssl-1.1.x"]
- }
+}
 
 datasource db {
   provider          = "mysql"
@@ -26,6 +26,33 @@ enum DeviceStatus {
   ACTIVE
   BLOCKED
   MAINTENANCE
+}
+
+model PladwayCachedCreative {
+  id               String             @id @default(uuid())
+  adId             String?
+  creativeId       String             @unique
+  sourceUrl        String             @db.Text
+  storagePath      String?
+  cachedUrl        String?
+  mimeType         String?
+  width            Int?
+  height           Int?
+  durationSeconds  Int?
+  status           PladwayCacheStatus @default(PENDING)
+  downloadAttempts Int                @default(0)
+  lastError        String?            @db.Text
+  expiresAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+enum PladwayCacheStatus {
+  PENDING
+  DOWNLOADING
+  READY
+  FAILED
+  EXPIRED
 }
 
 model Order {

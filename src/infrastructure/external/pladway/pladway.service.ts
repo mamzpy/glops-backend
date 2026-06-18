@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { PladwayCacheService } from './cache/pladway-cache.service';
 
 import type {
   PladwayAdResult,
@@ -29,6 +30,7 @@ export class PladwayService {
   constructor(
     private readonly vastResolverService: VastResolverService,
     private readonly httpService: HttpService,
+    private readonly pladwayCacheService: PladwayCacheService,
   ) {}
 
   async testVast(type: PladwayVastExampleType): Promise<PladwayAdResult> {
@@ -57,8 +59,33 @@ export class PladwayService {
     );
 
     // Temporary OR1-213 implementation:
-    // use the official Pladway full VAST example until real Pladway key/OpenRTB docs arrive.
-    return this.vastResolverService.resolve(PLADWAY_VAST_EXAMPLE_URLS.full);
+    // use the official Pladway full VAST example until real Pladway placement config arrives.
+    const result = await this.vastResolverService.resolve(
+      PLADWAY_VAST_EXAMPLE_URLS.full,
+    );
+
+    if (!result.available || !result.creativeId) {
+      return result;
+    }
+
+    const cache = await this.pladwayCacheService.resolve({
+      adId: result.adId,
+      creativeId: result.creativeId,
+      sourceUrl: result.media.url,
+      mimeType: result.media.mimeType,
+      width: result.media.width,
+      height: result.media.height,
+      durationSeconds: result.durationSeconds,
+    });
+
+    return {
+      ...result,
+      media: {
+        ...result.media,
+        cachedUrl: cache.cachedUrl,
+        cacheStatus: cache.status,
+      },
+    };
   }
 
   async fireImpressions(
