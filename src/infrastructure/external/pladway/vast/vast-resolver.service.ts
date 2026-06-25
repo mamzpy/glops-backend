@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { VASTClient } from '@dailymotion/vast-client';
 
 import { PladwayAdResult, PladwayTrackingUrls } from '../pladway.types';
+import { extractPladwayMetadataFromImpressionUrl } from './impression-metadata.util';
 
 @Injectable()
 export class VastResolverService {
@@ -70,10 +71,17 @@ export class VastResolverService {
         };
       }
 
-      const result: PladwayAdResult = {
+      const impressionUrls = this.extractUrlTemplates(ad.impressionURLTemplates);
+      const pladwayMetadata =
+        extractPladwayMetadataFromImpressionUrl(impressionUrls[0]);
+
+      const result = {
         available: true,
         source: 'PLADWAY_VAST',
-        priceCpm: null,
+        priceCpm: pladwayMetadata?.priceCpm ?? null,
+        impressionMultiplier: pladwayMetadata?.impressionMultiplier ?? null,
+        estimatedValue: pladwayMetadata?.estimatedValue ?? null,
+        pladwayMetadata,
         adId: this.toNullableString(ad.id),
         creativeId:
           this.toNullableString(linearCreative.id) ??
@@ -86,10 +94,10 @@ export class VastResolverService {
           width: this.toNullableNumber(mediaFile.width),
           height: this.toNullableNumber(mediaFile.height),
         },
-        impressionUrls: this.extractUrlTemplates(ad.impressionURLTemplates),
+        impressionUrls,
         trackingUrls: this.extractTrackingUrls(linearCreative.trackingEvents),
         wrappersResolved: null,
-      };
+      } satisfies PladwayAdResult;
 
       this.logger.log(
         `Pladway VAST resolved adId=${result.adId ?? 'n/a'} mediaType=${

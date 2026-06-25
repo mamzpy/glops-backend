@@ -1,3 +1,5 @@
+import type { PladwayImpressionMetadata } from './vast/impression-metadata.util';
+
 export type PladwayVastExampleType = 'full' | 'empty' | 'wrapper' | 'html5';
 
 export type PladwayAdSource = 'PLADWAY_VAST';
@@ -25,6 +27,9 @@ export interface PladwayAdAvailableResult {
   available: true;
   source: PladwayAdSource;
   priceCpm: number | null;
+  impressionMultiplier: number | null;
+  estimatedValue: number | null;
+  pladwayMetadata: PladwayImpressionMetadata | null;
   adId: string | null;
   creativeId: string | null;
   durationSeconds: number | null;
@@ -38,7 +43,10 @@ export interface PladwayAdAvailableResult {
 export interface PladwayAdUnavailableResult {
   available: false;
   source: PladwayAdSource;
-  priceCpm: number | null;
+  priceCpm?: number | null;
+  impressionMultiplier?: number | null;
+  estimatedValue?: number | null;
+  pladwayMetadata?: PladwayImpressionMetadata | null;
   reason: 'EMPTY_VAST' | 'NO_LINEAR_CREATIVE' | 'NO_MEDIA_FILE' | 'VAST_ERROR';
   errorMessage?: string;
   raw?: unknown;

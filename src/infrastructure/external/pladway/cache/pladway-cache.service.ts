@@ -52,7 +52,7 @@ export class PladwayCacheService {
     void this.downloadInBackground(record.creativeId, input);
 
     return {
-      status: record.status,
+      status: PladwayCacheStatus.PENDING,
       sourceUrl: input.sourceUrl,
       cachedUrl: null,
     };
